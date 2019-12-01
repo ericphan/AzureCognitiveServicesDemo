@@ -1,0 +1,103 @@
+﻿@model HomeViewModel
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+</div>
+
+
+<form method="post" enctype="multipart/form-data" asp-controller="Home">
+    <div class="form-group">
+        <div class="col-md-10">
+            <p>Upload an image:</p>
+            <input type="file" name="files" />
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-10">
+            <input type="submit" value="Upload" />
+        </div>
+    </div>
+</form>
+
+
+@if (!string.IsNullOrEmpty(Model.FileName))
+{
+    var base64 = Convert.ToBase64String(Model.Image);
+    var imgSrc = String.Format("data:image/jpg;base64,{0}", base64);
+
+    <img src="@imgSrc" alt="@Model.FileName" width="600" />
+
+    @foreach (var f in Model.Faces)
+    {
+        <h2>FaceId = @f.FaceId</h2>
+        <ul>
+            <li>Age: @f.FaceAttributes.Age</li>
+            <li>Gender: @f.FaceAttributes.Gender.Value.ToString()</li>
+            <li>Glasses: @f.FaceAttributes.Glasses.Value.ToString()</li>
+            <li>
+                Hair:
+                <ul>
+                    <li>Colour: @(string.Join(",", f.FaceAttributes.Hair.HairColor.Select(x => $"{x.Color.ToString()}: {x.Confidence.ToString("p2")}")))</li>
+                    <li>Bald: @f.FaceAttributes.Hair.Bald.ToString("p2")</li>
+                </ul>
+            </li>
+            <li>
+                Facial Hair:
+                <ul>
+                    <li>Beard: @f.FaceAttributes.FacialHair.Beard.ToString("p2")</li>
+                    <li>Moustache: @f.FaceAttributes.FacialHair.Moustache.ToString("p2")</li>
+                </ul>
+            </li>
+            <li>Smile: @f.FaceAttributes.Smile.Value.ToString("p2")</li>
+            <li>
+                Emotions:
+                <ul>
+                    <li>Anger: @f.FaceAttributes.Emotion.Anger.ToString("p2")</li>
+                    <li>Contempt: @f.FaceAttributes.Emotion.Contempt.ToString("p2")</li>
+                    <li>Disgust: @f.FaceAttributes.Emotion.Disgust.ToString("p2")</li>
+                    <li>Fear: @f.FaceAttributes.Emotion.Fear.ToString("p2")</li>
+                    <li>Happiness: @f.FaceAttributes.Emotion.Happiness.ToString("p2")</li>
+                    <li>Sadness: @f.FaceAttributes.Emotion.Sadness.ToString("p2")</li>
+                    <li>Surprise: @f.FaceAttributes.Emotion.Surprise.ToString("p2")</li>
+                </ul>
+            </li>
+        </ul>
+    }
+
+
+    @foreach (var f in Model.Objects)
+    {
+        <h2>ObjectId = @f.ObjectProperty (@f.Confidence.ToString("p2"))</h2>
+    }
+}
+
+
+
+<form method="post" enctype="multipart/form-data" asp-controller="Home" asp-action="Sentiment">
+    <div class="form-group">
+        <div class="col-md-10">
+            <p>Text:</p>
+            <input type="text" name="text" />
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-10">
+            <input type="submit" value="Analyse" />
+        </div>
+    </div>
+</form>
+
+
+
+@if (Model.Sentiment != null)
+{
+    <ul>
+        <li>@Model.Text</li>
+        <li>Score: @Model.Sentiment.Score</li>
+    </ul>
+
+}
